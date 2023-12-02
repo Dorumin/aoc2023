@@ -17,6 +17,12 @@ struct Pull {
     blue: i32
 }
 
+impl Game {
+    fn get_minimum(&self, map: impl Fn(&Pull) -> i32) -> i32 {
+        return self.pulls.iter().map(map).max().unwrap();
+    }
+}
+
 impl Filter {
     fn is_game_valid(&self, game: &Game) -> bool {
         return game.pulls.iter().all(|pull| pull.red <= self.red && pull.green <= self.green && pull.blue <= self.blue);
@@ -103,8 +109,7 @@ fn main() {
 
     let total: i32 = INPUT.lines()
         .map(|line| Game::from_str(line).expect("Games are valid lol"))
-        .filter(|game| filter.is_game_valid(game))
-        .map(|game| game.id)
+        .map(|game| game.get_minimum(|p| p.red) * game.get_minimum(|p| p.green) * game.get_minimum(|p| p.blue))
         .sum();
 
     dbg!(total);
