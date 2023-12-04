@@ -6,7 +6,7 @@ use itertools::Itertools;
 use regex::Regex;
 
 fn main() {
-    let numbers_regex = Regex::new(r"[0-9]+").unwrap();
+    let numbers_regex = Regex::new(r"\d+").unwrap();
     let scanner = SurroundScanner::new(INPUT);
 
     let numbers: Vec<_> = scanner.lines.iter()
