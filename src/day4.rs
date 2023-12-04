@@ -2,8 +2,9 @@ use once_cell::sync::Lazy;
 
 use regex::Regex;
 
+#[derive(Clone)]
 pub struct Scratchcard {
-    pub game_id: i32,
+    pub game_id: usize,
     pub winning_numbers: Vec<i32>,
     pub gotten_numbers: Vec<i32>
 }
