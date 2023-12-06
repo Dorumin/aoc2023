@@ -19,6 +19,16 @@ impl Races {
         })
     }
 
+    pub fn one_race(&self) -> Race {
+        let time: String = self.times.iter().map(|n| n.to_string()).collect();
+        let distance: String = self.distances.iter().map(|n| n.to_string()).collect();
+
+        Race {
+            time: time.parse().unwrap(),
+            distance: distance.parse().unwrap(),
+        }
+    }
+
     pub fn races(&self) -> Vec<Race> {
         self.times.iter()
             .zip(&self.distances)
