@@ -1,7 +1,7 @@
 use anyhow::Context;
 use itertools::Itertools;
 
-use std::{collections::HashMap, ops::Range, thread::current};
+use std::{collections::HashMap, ops::Range};
 
 type Seed = (MappingType, u64);
 type SeedRange = (MappingType, Range<u64>);

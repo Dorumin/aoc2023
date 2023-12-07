@@ -1,4 +1,4 @@
-use aoc2023::day5::{SeedsMap, MappingLine};
+use aoc2023::day5::{SeedsMap};
 
 const INPUT: &str = include_str!("../inputs/day5-seeds.txt");
 
