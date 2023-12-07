@@ -3,7 +3,7 @@ use aoc2023::day7::{Game, Ruleset};
 const INPUT: &str = include_str!("../inputs/day7-cards.txt");
 
 fn main() {
-    let mut game = Game::parse(INPUT, Ruleset::Simple);
+    let mut game = Game::parse(INPUT, Ruleset::Jokers);
 
     game.plays.sort();
 
