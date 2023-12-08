@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Debug, ops::{IndexMut, Index}};
+use std::{collections::{HashMap, hash_map::Keys}, fmt::Debug, ops::Index};
 
 use once_cell::sync::Lazy;
 use regex::Regex;
@@ -13,9 +13,13 @@ pub struct Map {
 }
 
 impl Map {
+    pub fn locations(&self) -> Keys<'_, Location, (Location, Location)> {
+        self.locations.keys()
+    }
+
     pub fn parse(input: &str) -> Option<Map> {
         static NODE_LINE_REGEX: Lazy<Regex> = Lazy::new(||
-            Regex::new(r"^(?<start>[A-Z]{3}) = \((?<left>[A-Z]{3}), (?<right>[A-Z]{3})\)$").unwrap()
+            Regex::new(r"^(?<start>\w{3}) = \((?<left>\w{3}), (?<right>\w{3})\)$").unwrap()
         );
 
         let mut lines = input.lines();
@@ -42,9 +46,24 @@ impl Map {
     }
 
     pub fn walk(&self) -> Vec<Location> {
+        self.walk_from_until(START_LOCATION, |loc| loc == END_LOCATION)
+    }
+
+    pub fn step_node(&self, location: Location, direction: Direction) -> Location {
+        return self.locations[&location][direction];
+    }
+
+    pub fn directions_infinite(&self) -> impl Iterator<Item = Direction> + '_ {
+        (0..self.directions.len()).cycle().map(|i| self.directions[i])
+    }
+
+    pub fn walk_from_until<F>(&self, start_location: Location, end_condition: F) -> Vec<Location>
+    where
+        F: Fn(Location) -> bool
+    {
         // I would love to make this a generator
         let mut locations = vec![];
-        let mut current_location = START_LOCATION;
+        let mut current_location = start_location;
 
         for i in (0..self.directions.len()).cycle() {
             let direction = &self.directions[i];
@@ -52,7 +71,7 @@ impl Map {
 
             locations.push(current_location);
 
-            if current_location == END_LOCATION {
+            if end_condition(current_location) {
                 break;
             }
         }
@@ -97,6 +116,14 @@ impl Location {
     fn from_str(three_chars: &str) -> Option<Location> {
         let location = Location(three_chars.as_bytes().try_into().ok()?);
         Some(location)
+    }
+
+    pub fn is_ghost_start(&self) -> bool {
+        self.0[2] == b'A'
+    }
+
+    pub fn is_ghost_end(&self) -> bool {
+        self.0[2] == b'Z'
     }
 }
 
