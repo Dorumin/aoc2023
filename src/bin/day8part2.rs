@@ -17,25 +17,23 @@ fn main() {
 
     dbg!(closest);
 
-    // for direction in map.directions_infinite() {
-    //     // dbg!(direction);
+    let mut steps = 0;
+    for direction in map.directions_infinite() {
+        steps += 1;
 
-    //     for location in ghost_locations.iter_mut() {
-    //         *location = map.step_node(*location, direction);
-    //     }
+        if steps % 10000000 == 0 {
+            eprintln!("reached {steps} steps");
+        }
 
-    //     if ghost_locations.iter().all(|loc| loc.is_ghost_end()) {
-    //         break;
-    //     }
-    // }
+        for location in ghost_locations.iter_mut() {
+            *location = map.step_node(*location, direction);
+        }
 
-    // dbg!(ghost_locations);
+        if ghost_locations.iter().all(|loc| loc.is_ghost_end()) {
+            break;
+        }
+    }
 
-    // let total: u64 = start_locations
-    //     .map(|start|
-    //         map.walk_from_until(*start, |loc| loc.is_ghost_end()).len() as u64
-    //     )
-    //     .sum();
-
-    // dbg!(total);
+    dbg!(ghost_locations);
+    dbg!(steps);
 }
