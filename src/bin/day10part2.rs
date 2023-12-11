@@ -6,17 +6,17 @@ use geo::{LineString, Coord, Polygon, Contains, Point};
 const INPUT: &str = include_str!("../inputs/day10-mario.txt");
 
 fn main() {
-    let oasis = Map::parse(INPUT).unwrap();
+    let map = Map::parse(INPUT).unwrap();
 
-    println!("{width} {height}", width = oasis.width, height = oasis.height);
-    // println!("{oasis}");
+    println!("{width} {height}", width = map.width, height = map.height);
+    // println!("{map}");
 
-    let mut path = oasis.follow(oasis.start()).unwrap();
+    let mut path = map.follow(map.start()).unwrap();
 
-    // println!("{}", oasis.display_path(&path));
+    // println!("{}", map.display_path(&path));
 
     // Make the path closed
-    path.push(oasis.start());
+    path.push(map.start());
 
     let linestr = time("build linestr", || LineString::new(
         path.iter()
@@ -29,7 +29,7 @@ fn main() {
     let shape = time("build polygon", || Polygon::new(linestr, vec![]));
 
     let inner_count = time("count of contains", || {
-        oasis.positions().into_iter()
+        map.positions().into_iter()
             .filter(|&pos|
                 shape.contains(&Point::new(pos.x as f64, pos.y as f64))
             )
