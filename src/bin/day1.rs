@@ -31,7 +31,7 @@ impl Calibration {
         let first = matches.iter()
             .enumerate()
             .map(|(i, find)| (i, haystack.find(find)))
-            .flat_map(|(i, matched)| if let Some(x) = matched { Some((i, x)) } else { None })
+            .flat_map(|(i, matched)| matched.map(|x| (i, x)))
             .reduce(|smallest, current| if smallest.1 < current.1 { smallest } else { current })
             .unwrap();
 
@@ -42,7 +42,7 @@ impl Calibration {
         let last = matches.iter()
             .enumerate()
             .map(|(i, find)| (i, haystack.rfind(find)))
-            .flat_map(|(i, matched)| if let Some(x) = matched { Some((i, x)) } else { None })
+            .flat_map(|(i, matched)| matched.map(|x| (i, x)))
             .reduce(|largest, current| if largest.1 > current.1 { largest } else { current })
             .unwrap();
 
@@ -60,9 +60,9 @@ impl Calibration {
 
 fn main() {
     let total = INPUT.lines()
-        .map(|line| Calibration::from_str(line))
+        .map(Calibration::from_str)
         .inspect(|c| eprintln!("{} = {}", c.as_ref().unwrap().line, c.as_ref().unwrap().number))
-        .flat_map(|opt| opt)
+        .flatten()
         .fold(0, |n, c| n + c.number);
 
     dbg!(total);

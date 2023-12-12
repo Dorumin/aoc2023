@@ -10,7 +10,7 @@ pub struct History {
 
 impl Oasis {
     pub fn parse(input: &str) -> Option<Oasis> {
-        let histories: Option<Vec<History>> = input.lines().map(|line| History::parse_line(line)).collect();
+        let histories: Option<Vec<History>> = input.lines().map(History::parse_line).collect();
 
         Some(Oasis {
             histories: histories?
@@ -69,7 +69,7 @@ impl History {
             .rev()
             .skip(1)
             .map(|layer| layer.last().unwrap())
-            .fold(0, |sum, n| sum + n);
+            .sum();
 
         (first_predicted_cell, last_predicted_cell)
     }

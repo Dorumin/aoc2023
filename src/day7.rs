@@ -21,7 +21,7 @@ impl Game {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Ord)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Play {
     pub cards: [Card; 5],
     pub bid: u64,
@@ -45,6 +45,7 @@ impl PartialOrd for Play {
         None
     }
 }
+
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum HandType {
     FiveOfAKind,

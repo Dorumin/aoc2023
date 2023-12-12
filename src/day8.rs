@@ -50,7 +50,7 @@ impl Map {
     }
 
     pub fn step_node(&self, location: Location, direction: Direction) -> Location {
-        return self.locations[&location][direction];
+        self.locations[&location][direction]
     }
 
     pub fn directions_infinite(&self) -> impl Iterator<Item = Direction> + '_ {

@@ -8,12 +8,12 @@ const INPUT: &str = include_str!("../inputs/day10-mario.txt");
 fn main() {
     let map = Map::parse(INPUT).unwrap();
 
-    println!("{width} {height}", width = map.width, height = map.height);
+    // println!("{width} {height}", width = map.width, height = map.height);
     // println!("{map}");
 
     let mut path = map.follow(map.start()).unwrap();
 
-    // println!("{}", map.display_path(&path));
+    println!("{}", map.display_path(&path));
 
     // Make the path closed
     path.push(map.start());
@@ -29,7 +29,7 @@ fn main() {
     let shape = time("build polygon", || Polygon::new(linestr, vec![]));
 
     let inner_count = time("count of contains", || {
-        map.positions().into_iter()
+        map.positions().iter()
             .filter(|&pos|
                 shape.contains(&Point::new(pos.x as f64, pos.y as f64))
             )

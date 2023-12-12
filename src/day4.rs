@@ -37,9 +37,9 @@ impl Scratchcard {
         let count = self.gotten_winning_numbers();
 
         if count == 0 {
-            return 0;
+            0
         } else {
-            return 1 << (count - 1);
+            1 << (count - 1)
         }
     }
 }

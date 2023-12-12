@@ -151,7 +151,7 @@ impl SeedsMap {
         let mut mapping: Option<Mapping> = None;
 
         for line in lines {
-            if line == "" {
+            if line.is_empty() {
                 assert!(mapping.is_some());
 
                 if let Some(mapping) = mapping.take() {
@@ -184,9 +184,9 @@ impl Mapping {
         let line = line.strip_suffix(" map:").context("mapping header must end with map:")?;
         let mut parts = line.split('-');
 
-        let from = parts.next().and_then(|p| MappingType::from_str(p)).context("From type must be a valid mapping type")?;
+        let from = parts.next().and_then(MappingType::from_str).context("From type must be a valid mapping type")?;
         assert_eq!(parts.next(), Some("to"));
-        let to = parts.next().and_then(|p| MappingType::from_str(p)).context("To type must be a valid mapping type")?;
+        let to = parts.next().and_then(MappingType::from_str).context("To type must be a valid mapping type")?;
 
         Ok(Mapping {
             from,
@@ -255,12 +255,12 @@ impl MappingLine {
                 return (Some(source.start..range.end), vec![range.start..source.start])
             }
 
-            return (Some(source.start..source.end), vec![range.start..source.start, source.end..range.end]);
+            (Some(source.start..source.end), vec![range.start..source.start, source.end..range.end])
         };
 
         let (mapped, rest) = get_range(range);
         let mapped = mapped.map(|r| self.offset(r.start)..self.offset(r.end));
 
-        return (mapped, rest);
+        (mapped, rest)
     }
 }

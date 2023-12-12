@@ -33,7 +33,7 @@ impl Game {
         return self.pulls.iter().map(map).max().unwrap();
     }
 
-    pub fn from_str(line: &str) -> Option<Self> {
+    pub fn parse(line: &str) -> Option<Self> {
         let mut pulls = Vec::new();
         let mut line = line.strip_prefix("Game ")?;
         let id;
@@ -50,7 +50,7 @@ impl Game {
 
                 let n;
                 (n, line) = get_number_prefix(line)?;
-                line = line.strip_prefix(" ")?;
+                line = line.strip_prefix(' ')?;
 
                 if let Some(rest) = line.strip_prefix("red") {
                     red = n;
@@ -89,7 +89,7 @@ impl Game {
     }
 }
 
-pub fn get_number_prefix<'a>(s: &'a str) -> Option<(i32, &'a str)> {
+pub fn get_number_prefix(s: &str) -> Option<(i32, &str)> {
     let rest = s.trim_start_matches(|c: char| c.is_numeric());
 
     if rest.len() == s.len() {
@@ -97,7 +97,7 @@ pub fn get_number_prefix<'a>(s: &'a str) -> Option<(i32, &'a str)> {
     } else {
         let removed = s[..(s.len() - rest.len())].parse().ok()?;
 
-        return Some((removed, rest));
+        Some((removed, rest))
     }
 }
 
@@ -107,31 +107,31 @@ mod tests {
 
     #[test]
     fn aoc_samples() {
-        Game::from_str("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green").unwrap();
-        Game::from_str("Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue").unwrap();
-        Game::from_str("Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red").unwrap();
-        Game::from_str("Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red").unwrap();
-        Game::from_str("Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green").unwrap();
+        Game::parse("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green").unwrap();
+        Game::parse("Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue").unwrap();
+        Game::parse("Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red").unwrap();
+        Game::parse("Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red").unwrap();
+        Game::parse("Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green").unwrap();
     }
 
     #[test]
     fn missing() {
-        Game::from_str("Game 1: 3 blue, 4 red, 1 green").unwrap();
-        Game::from_str("Game 1: 3 blue, 4 red").unwrap();
-        Game::from_str("Game 1: 3 blue").unwrap();
-        Game::from_str("Game 1: 4 red").unwrap();
-        Game::from_str("Game 1: 1 blue").unwrap();
+        Game::parse("Game 1: 3 blue, 4 red, 1 green").unwrap();
+        Game::parse("Game 1: 3 blue, 4 red").unwrap();
+        Game::parse("Game 1: 3 blue").unwrap();
+        Game::parse("Game 1: 4 red").unwrap();
+        Game::parse("Game 1: 1 blue").unwrap();
     }
 
     #[test]
     fn repeats() {
         // This probably shouldn't work, but we don't care
-        Game::from_str("Game 1: 1 blue, 2 blue, 3 blue").unwrap();
+        Game::parse("Game 1: 1 blue, 2 blue, 3 blue").unwrap();
     }
 
     #[test]
     #[should_panic]
     fn no_more_than_three() {
-        Game::from_str("Game 1: 1 blue, 2 blue, 3 blue, 4 blue, 5 blue").unwrap();
+        Game::parse("Game 1: 1 blue, 2 blue, 3 blue, 4 blue, 5 blue").unwrap();
     }
 }

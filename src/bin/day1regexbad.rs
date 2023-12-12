@@ -46,9 +46,7 @@ impl Calibration {
 
 fn main() {
     let total = INPUT.lines()
-        .map(|line| Calibration::from_str(line))
-        // .inspect(|c| eprintln!("{} = {}", c.as_ref().unwrap().line, c.as_ref().unwrap().number))
-        .flat_map(|opt| opt)
+        .filter_map(Calibration::from_str)
         .fold(0, |n, c| n + c.number);
 
     dbg!(total);

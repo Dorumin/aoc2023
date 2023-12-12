@@ -4,7 +4,7 @@ const INPUT: &str = include_str!("../inputs/day4-scratchcards.txt");
 
 fn main() {
     let mut cards: Vec<_> = INPUT.lines()
-        .flat_map(|line| Scratchcard::parse_line(line))
+        .flat_map(Scratchcard::parse_line)
         .collect();
 
     let max_index = cards.len();
@@ -26,7 +26,7 @@ fn main() {
             }
 
             let next_card = &cards[next_index];
-            assert_eq!(next_card.game_id as usize, next_index + 1);
+            assert_eq!(next_card.game_id, next_index + 1);
 
             cards.push(next_card.clone());
         }

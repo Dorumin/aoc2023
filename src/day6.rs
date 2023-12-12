@@ -51,7 +51,7 @@ impl Race {
         }
     }
 
-    pub fn possible_winning_scores<'r>(&'r self) -> impl Iterator<Item = Attempt> + 'r {
+    pub fn possible_winning_scores(&self) -> impl Iterator<Item = Attempt> + '_ {
         (0..self.time)
             .map(|n| Attempt::new_naive(n, self.time))
             .filter(|a| self.attempt_is_winning(a))

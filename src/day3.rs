@@ -26,7 +26,7 @@ impl<'a> SurroundScanner<'a> {
     }
 
     fn get_offset(&self, line_index: Option<usize>, char_index: Option<usize>) -> Option<(usize, usize, char)> {
-        let line = self.lines.iter().nth(line_index?)?;
+        let line = self.lines.get(line_index?)?;
         let char = line.chars().nth(char_index?)?;
 
         Some((line_index?, char_index?, char))
@@ -38,28 +38,28 @@ impl<'a> SurroundScanner<'a> {
         let block: &Block = block.borrow();
 
         // Top-left corner
-        self.get_offset(block.y.checked_sub(1), block.x.checked_sub(1)).map(|c| chars.push(c));
+        if let Some(c) = self.get_offset(block.y.checked_sub(1), block.x.checked_sub(1)) { chars.push(c) }
         // Top row
         for i in 0..block.width {
-            self.get_offset(block.y.checked_sub(1), block.x.checked_add(i)).map(|c| chars.push(c));
+            if let Some(c) = self.get_offset(block.y.checked_sub(1), block.x.checked_add(i)) { chars.push(c) }
         }
         // Top-right corner
-        self.get_offset(block.y.checked_sub(1), block.x.checked_add(block.width)).map(|c| chars.push(c));
+        if let Some(c) = self.get_offset(block.y.checked_sub(1), block.x.checked_add(block.width)) { chars.push(c) }
 
         // Left and right columns
         for i in 0..block.height {
-            self.get_offset(block.y.checked_add(i), block.x.checked_sub(1)).map(|c| chars.push(c));
-            self.get_offset(block.y.checked_add(i), block.x.checked_add(block.width)).map(|c| chars.push(c));
+            if let Some(c) = self.get_offset(block.y.checked_add(i), block.x.checked_sub(1)) { chars.push(c) }
+            if let Some(c) = self.get_offset(block.y.checked_add(i), block.x.checked_add(block.width)) { chars.push(c) }
         }
 
         // Bottom-left corner
-        self.get_offset(block.y.checked_add(1), block.x.checked_sub(1)).map(|c| chars.push(c));
+        if let Some(c) = self.get_offset(block.y.checked_add(1), block.x.checked_sub(1)) { chars.push(c) }
         // Bottom row
         for i in 0..block.width {
-            self.get_offset(block.y.checked_add(1), block.x.checked_add(i)).map(|c| chars.push(c));
+            if let Some(c) = self.get_offset(block.y.checked_add(1), block.x.checked_add(i)) { chars.push(c) }
         }
         // Bottom-right corner
-        self.get_offset(block.y.checked_add(1), block.x.checked_add(block.width)).map(|c| chars.push(c));
+        if let Some(c) = self.get_offset(block.y.checked_add(1), block.x.checked_add(block.width)) { chars.push(c) }
 
         chars
     }

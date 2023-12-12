@@ -5,7 +5,7 @@ const INPUT: &str = include_str!("../inputs/day7-cards.txt");
 fn main() {
     let mut game = Game::parse(INPUT, Ruleset::Jokers);
 
-    game.plays.sort();
+    game.plays.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
     let result = game.plays.iter()
         .rev()

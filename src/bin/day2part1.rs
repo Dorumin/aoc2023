@@ -10,7 +10,7 @@ fn main() {
     };
 
     let total: i32 = INPUT.lines()
-        .map(|line| Game::from_str(line).expect("Games are valid lol"))
+        .map(|line| Game::parse(line).expect("Games are valid lol"))
         .filter(|game| filter.is_game_valid(game))
         .map(|game| game.id)
         .sum();

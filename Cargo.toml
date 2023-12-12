@@ -15,3 +15,6 @@ once_cell = "1.18.0"
 pathfinding = "4.4.0"
 regex = "1.10.2"
 stable-pattern = "0.1.0"
+
+[lints.clippy]
+single_range_in_vec_init = "allow"
