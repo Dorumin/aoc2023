@@ -47,6 +47,7 @@ dependencies = [
  "once_cell",
  "pathfinding",
  "regex",
+ "smallvec",
  "stable-pattern",
 ]
 
