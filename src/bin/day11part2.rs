@@ -8,7 +8,7 @@ fn main() {
 
     // eprintln!("{cosmos}");
 
-    cosmos.expand_empty_lines(999999);
+    cosmos.expand_empty_lines(999_999);
 
     // eprintln!("{cosmos}");
 

@@ -31,7 +31,7 @@ impl Calibration {
         let first = matches.iter()
             .enumerate()
             .map(|(i, find)| (i, haystack.find(find)))
-            .flat_map(|(i, matched)| matched.map(|x| (i, x)))
+            .filter_map(|(i, matched)| matched.map(|x| (i, x)))
             .reduce(|smallest, current| if smallest.1 < current.1 { smallest } else { current })
             .unwrap();
 
@@ -42,7 +42,7 @@ impl Calibration {
         let last = matches.iter()
             .enumerate()
             .map(|(i, find)| (i, haystack.rfind(find)))
-            .flat_map(|(i, matched)| matched.map(|x| (i, x)))
+            .filter_map(|(i, matched)| matched.map(|x| (i, x)))
             .reduce(|largest, current| if largest.1 > current.1 { largest } else { current })
             .unwrap();
 

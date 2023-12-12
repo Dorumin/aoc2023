@@ -18,3 +18,7 @@ stable-pattern = "0.1.0"
 
 [lints.clippy]
 single_range_in_vec_init = "allow"
+nursery = { level = "warn", priority = -1 }
+use_self = "allow"
+missing_const_for_fn = "allow"
+cast_precision_loss = "allow"

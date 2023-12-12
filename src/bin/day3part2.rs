@@ -40,7 +40,7 @@ fn main() {
         })
         .map(|(_, surrounding_numbers)| surrounding_numbers)
         .filter(|surrounding_numbers| surrounding_numbers.len() >= 2)
-        .map(|surrounding_numbers| surrounding_numbers.iter().map(|n| n.1 as i64).reduce(|total, number| total * number).unwrap())
+        .map(|surrounding_numbers| surrounding_numbers.iter().map(|n| i64::from(n.1)).reduce(|total, number| total * number).unwrap())
         .sum();
 
     dbg!(total);
