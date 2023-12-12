@@ -1,16 +1,40 @@
 use std::fmt::{Display, Write};
 
 pub struct Cosmos {
-    rows: Vec<Vec<Pixel>>
+    rows: Vec<Row>
+}
+
+pub struct Row {
+    x: usize,
+    cells: Vec<Cell>
+}
+
+impl Row {
+    fn is_empty(&self) -> bool {
+        self.cells.iter().all(|c| c.pixel.is_empty())
+    }
+}
+
+pub struct Cell {
+    y: usize,
+    pixel: Pixel
 }
 
 impl Cosmos {
     pub fn parse(input: &str) -> Option<Cosmos> {
         let rows = input.lines()
-            .map(|line|
-                line.chars()
-                    .map(|c| Pixel::from_char(c).unwrap())
-                    .collect()
+            .enumerate()
+            .map(|(x, line)|
+                Row {
+                    x,
+                    cells: line.chars()
+                        .enumerate()
+                        .map(|(y, c)| Cell {
+                            y,
+                            pixel: Pixel::from_char(c).unwrap()
+                        })
+                        .collect()
+                }
             )
             .collect();
 
@@ -19,40 +43,78 @@ impl Cosmos {
         })
     }
 
-    pub fn expand_empty_lines(&mut self) {
+    pub fn expand_empty_lines(&mut self, multiplier: usize) {
         // Expand dong, I mean rows. Flat map is an easy way to expand individual items into multiple
         // I don't know how well it does at doing this in-place. Likely not at all
         // But it's better than a for loop which mutates the array
 
-        // Sneaky ownership stealing
-        let rows = std::mem::take(&mut self.rows);
+        let mut accumulated_row_increment = 0;
+        for row in self.rows.iter_mut() {
+            if row.is_empty() {
+                accumulated_row_increment += multiplier;
+            }
 
-        self.rows = rows.into_iter()
-            .flat_map(|row| {
-                let row_is_empty = row.iter().all(|p| p.is_empty());
-                std::iter::repeat(row).take(if row_is_empty { 2 } else { 1 })
-            })
-            .collect();
-
-        // Expand the columns, which is only mildly more annoying
-        let row_length = self.rows.first().expect("Fuck you there is at least one row").len();
-        for i in row_length..0 {
-
+            row.x += accumulated_row_increment;
         }
+
+        let mut accumulated_column_increment = 0;
+        let row_length = self.rows.first().expect("Fuck you there is at least one row").cells.len();
+        for i in 0..row_length {
+            if self.rows.iter().all(|row| row.cells[i].pixel.is_empty()) {
+                accumulated_column_increment += multiplier;
+            }
+
+            for row in self.rows.iter_mut() {
+                row.cells[i].y += accumulated_column_increment;
+            }
+        }
+    }
+
+    pub fn positions(&self) -> Vec<Tile> {
+        self.rows.iter()
+            .flat_map(|row|
+                row.cells.iter().map(move |cell| Tile {
+                    x: row.x,
+                    y: cell.y,
+                    pixel: cell.pixel.clone()
+                })
+            )
+            .collect()
     }
 }
 
 impl Display for Cosmos {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for row in self.rows.iter() {
-            for pixel in row {
-                pixel.fmt(f)?;
+            for cell in row.cells.iter() {
+                cell.pixel.fmt(f)?;
             }
 
             f.write_char('\n')?;
         }
 
         Ok(())
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Tile {
+    pub x: usize,
+    pub y: usize,
+    pub pixel: Pixel
+}
+
+impl Tile {
+    pub fn new(x: usize, y: usize, pixel: Pixel) -> Self{
+        Self {
+            x,
+            y,
+            pixel
+        }
+    }
+
+    pub fn distance(&self, other: &Self) -> usize {
+        self.x.abs_diff(other.x) + self.y.abs_diff(other.y)
     }
 }
 
@@ -73,8 +135,12 @@ impl Pixel {
         Some(pixel)
     }
 
-    fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         matches!(self, Pixel::Empty)
+    }
+
+    pub fn is_galaxy(&self) -> bool {
+        matches!(self, Pixel::Galaxy)
     }
 }
 
