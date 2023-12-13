@@ -7,18 +7,19 @@ fn main() {
 
     map.unfold();
 
-    for row in map.rows.iter() {
-        for rec in row.records.iter() {
-            print!("{}", rec.to_char());
-        }
+    // for row in map.rows.iter() {
+    //     for rec in row.records.iter() {
+    //         print!("{}", rec.to_char());
+    //     }
 
-        println!();
-    }
+    //     println!();
+    // }
 
     let rows_arrangements = map.rows.iter()
-        .map(|row| row.possible_arrangements().len());
+        .skip(std::env::args().nth(1).unwrap().parse().unwrap())
+        .map(|row| row.possible_arrangements_count());
 
-    let sum: usize = rows_arrangements.sum();
+    let sum: u64 = rows_arrangements.sum();
 
     dbg!(sum);
 }
