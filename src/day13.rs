@@ -36,14 +36,6 @@ pub struct Pattern {
 }
 
 impl Pattern {
-    fn parse(grid: &str) -> Option<Self> {
-        let rows = grid.lines().map(|line| Row::from_line(line).unwrap()).collect();
-
-        Some(Self {
-            rows
-        })
-    }
-
     fn height(&self) -> usize {
         self.rows.len()
     }
