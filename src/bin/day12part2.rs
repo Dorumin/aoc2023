@@ -21,7 +21,7 @@ fn main() {
     let rows_arrangements = map.rows.iter()
         .skip(skip_count)
         .take(end_position - skip_count)
-        .map(|row| row.possible_arrangements_count());
+        .map(|row| row.possible_arrangements_dp());
 
     let sum: u64 = rows_arrangements.sum();
 

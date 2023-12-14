@@ -1,4 +1,4 @@
-use std::{ops::Range, collections::HashSet, fmt::{Display, Write}, cell::RefCell, time::Instant};
+use std::{ops::Range, collections::{HashSet, HashMap}, fmt::{Display, Write}, cell::RefCell, time::Instant};
 
 #[derive(Debug)]
 pub struct Map {
@@ -279,6 +279,154 @@ impl Row {
         println!("\r{}. row count {possibility_count} in {:?}", self.index + 1, start_time.elapsed());
 
         possibility_count
+    }
+
+    pub fn possible_arrangements_dp(&self) -> u64 {
+        // The possibility buffers needs an extra one at the end
+        // because we copy the previous one into the next when moving to the next group
+        let mut possibility_buffers: Vec<RefCell<Vec<RecordCompute>>> = Vec::new();
+
+        possibility_buffers.resize_with(
+            self.groups.len() + 1,
+            || RefCell::new(self.records.iter().cloned().map(From::from).collect())
+        );
+
+        let mut possibility_count = 0;
+        // let start_time = Instant::now();
+
+        fn is_range_damageable(possibility_buffer: &[RecordCompute], range: &Range<usize>) -> bool {
+            debug_assert!(range.end <= possibility_buffer.len());
+
+            let before = range.start.checked_sub(1).map(|i| &possibility_buffer[i]);
+            let after = possibility_buffer.get(range.end); // Ranges are non-exclusive at the end
+            let slice = &possibility_buffer[range.clone()];
+
+            !matches!(before, Some(RecordCompute::Damaged | RecordCompute::DamagedAccountedFor))
+            && !matches!(after, Some(RecordCompute::Damaged | RecordCompute::DamagedAccountedFor))
+            && slice.iter().all(|record| matches!(record, RecordCompute::Damaged | RecordCompute::Unknown))
+        }
+
+        fn explore_group(
+            cache: &mut HashMap<(usize, usize), (u64, u64)>,
+            ordered_groups: &[usize],
+            possibility_count: &mut u64,
+            possibility_buffers: &[RefCell<Vec<RecordCompute>>],
+            group_index: usize,
+            start_search: usize
+        ) -> u64 {
+            if let Some(n) = cache.get(&(group_index, start_search)) {
+                return n.1;
+            }
+
+            let possibility_buffer = &possibility_buffers[group_index].borrow();
+
+            if group_index >= ordered_groups.len() {
+                // Reached the end
+
+                // If there are any damaged slots left unaccounted for, we fucked up
+                if possibility_buffer.iter().rev().any(|r| matches!(r, RecordCompute::Damaged)) {
+                    return 0;
+                }
+
+                *possibility_count += 1;
+
+                if (*possibility_count % 100000) == 0 {
+                    print!("\r{possibility_count}");
+                }
+
+                return 1;
+            }
+
+            let mut total = 0;
+
+            let group_length = ordered_groups[group_index];
+            let remaining_groups = &ordered_groups[group_index..];
+            let remaining_group_lengths = remaining_groups.iter()
+                // We add +2 to each group size to account for surrounding operational records
+                // This has to be counterbalanced by a total + 2 to account for the limits of the line
+                // being able to harbor groups, regardless of surrounding machinery
+                // plus one, of course. Why is there always a plus one
+                .fold(0, |sum, g| sum + *g + 2);
+
+            for start in start_search..(possibility_buffer.len() - remaining_group_lengths + remaining_groups.len() + 2) {
+                let range = start..start + group_length;
+
+                if is_range_damageable(possibility_buffer, &range) {
+                    // let indent = " ".repeat(group_index * 4);
+                    // eprintln!("{indent}{group_index} damageable at range {}..{}", range.start, range.end);
+
+                    let mut next_buffer = possibility_buffers[group_index + 1].borrow_mut();
+                    next_buffer.copy_from_slice(possibility_buffer);
+
+                    if let Some(before_index) = range.start.checked_sub(1) {
+                        next_buffer[before_index] = RecordCompute::Operational;
+                    }
+
+                    if let Some(after_item) = next_buffer.get_mut(range.end) {
+                        *after_item = RecordCompute::Operational;
+                    }
+
+                    next_buffer[range].fill(RecordCompute::DamagedAccountedFor);
+
+                    drop(next_buffer);
+
+                    let group_result = explore_group(
+                        cache,
+                        ordered_groups,
+                        possibility_count,
+                        possibility_buffers,
+                        group_index + 1,
+                        start + group_length + 1
+                    );
+
+                    total += group_result;
+
+                    let cached = cache.entry((group_index + 1, start + group_length + 1)).or_insert((0, 0));
+                    cached.0 += 1;
+                    cached.1 = group_result;
+                }
+
+                if let Some(before_index) = start.checked_sub(1) {
+                    if possibility_buffer[before_index] == RecordCompute::Damaged {
+                        break;
+                    }
+                }
+            }
+
+            total
+        }
+
+        // dynamic cache mapping input params to explore (group_index, start_search)
+        // to results (occurrences, search results)
+        let mut shitty_cache: HashMap<(usize, usize), (u64, u64)> = HashMap::new();
+
+        // fn speedy_pass(
+        //     cache: &mut HashMap<(usize, usize), (usize, usize)>,
+        //     ordered_groups: &[usize],
+        //     possibility_count: &mut u64,
+        //     possibility_buffers: &[RefCell<Vec<RecordCompute>>],
+        //     group_index: usize,
+        //     start_search: usize
+        // ) {
+        //     let max_depth = possibility_buffers[0].borrow().len() / 2;
+        // }
+
+        let resulting_total = explore_group(
+            &mut shitty_cache,
+            &self.groups,
+            &mut possibility_count,
+            &possibility_buffers,
+             0,
+             0,
+        );
+
+        // dbg!(shitty_cache);
+
+        // dbg!(resulting_total);
+
+        // println!("\r{}. row count {resulting_total} in {:?}", self.index + 1, start_time.elapsed());
+
+        resulting_total
     }
 
     pub fn possible_arrangements_starts(&self) -> Vec<heapless::Vec<u8, 32>> {
