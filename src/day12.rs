@@ -212,12 +212,23 @@ impl Row {
 
                 *possibility_count += 1;
 
+                if (*possibility_count % 100000) == 0 {
+                    print!("\r{possibility_count}");
+                }
+
                 return;
             }
 
             let group_length = ordered_groups[group_index];
+            let remaining_groups = &ordered_groups[group_index..];
+            let remaining_group_lengths = remaining_groups.iter()
+                // We add +2 to each group size to account for surrounding operational records
+                // This has to be counterbalanced by a total + 2 to account for the limits of the line
+                // being able to harbor groups, regardless of surrounding machinery
+                // plus one, of course. Why is there always a plus one
+                .fold(0, |sum, g| sum + *g + 2);
 
-            for start in start_search..(possibility_buffer.len() - group_length + 1) {
+            for start in start_search..(possibility_buffer.len() - remaining_group_lengths + remaining_groups.len() + 2) {
                 let range = start..start + group_length;
 
                 if is_range_damageable(possibility_buffer, &range) {
@@ -264,7 +275,8 @@ impl Row {
              0,
         );
 
-        println!("{}. row count {possibility_count} in {:?}", self.index + 1, start_time.elapsed());
+
+        println!("\r{}. row count {possibility_count} in {:?}", self.index + 1, start_time.elapsed());
 
         possibility_count
     }

@@ -15,8 +15,12 @@ fn main() {
     //     println!();
     // }
 
+    let mut args = std::env::args().skip(1);
+    let skip_count = args.next().unwrap().parse().unwrap();
+    let end_position: usize = args.next().unwrap().parse().unwrap();
     let rows_arrangements = map.rows.iter()
-        .skip(std::env::args().nth(1).unwrap().parse().unwrap())
+        .skip(skip_count)
+        .take(end_position - skip_count)
         .map(|row| row.possible_arrangements_count());
 
     let sum: u64 = rows_arrangements.sum();
