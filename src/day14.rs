@@ -1,6 +1,6 @@
 use std::fmt::{Display, Write};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Platform {
     pub rows: Vec<Vec<Item>>
 }
@@ -24,6 +24,13 @@ impl Platform {
         self.rows[0].len()
     }
 
+    pub fn tilt_cycle(&mut self) {
+        self.tilt(Direction::Up);
+        self.tilt(Direction::Left);
+        self.tilt(Direction::Down);
+        self.tilt(Direction::Right);
+    }
+
     pub fn tilt(&mut self, direction: Direction) {
         match direction {
             Direction::Up => {
@@ -33,9 +40,27 @@ impl Platform {
                     }
                 }
             },
-            Direction::Down => todo!(),
-            Direction::Left => todo!(),
-            Direction::Right => todo!(),
+            Direction::Down => {
+                for y in (0..self.rows.len()).rev() {
+                    for x in 0..self.width() {
+                        self.slide_tile(x, y, direction.clone());
+                    }
+                }
+            },
+            Direction::Left => {
+                for y in 0..self.rows.len() {
+                    for x in 0..self.width() {
+                        self.slide_tile(x, y, direction.clone());
+                    }
+                }
+            },
+            Direction::Right => {
+                for y in 0..self.rows.len() {
+                    for x in (0..self.width()).rev() {
+                        self.slide_tile(x, y, direction.clone());
+                    }
+                }
+            },
         }
     }
 
@@ -117,7 +142,7 @@ pub enum Direction {
     Right
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Item {
     Empty,
     RoundedRock,
