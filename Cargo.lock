@@ -43,6 +43,7 @@ dependencies = [
  "genawaiter",
  "geo",
  "heapless 0.8.0",
+ "indexmap",
  "itertools 0.12.0",
  "num",
  "once_cell",
