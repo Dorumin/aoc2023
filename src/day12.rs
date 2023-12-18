@@ -422,7 +422,7 @@ impl Row {
 
         // dbg!(shitty_cache);
 
-        // dbg!(resulting_total);
+        dbg!(resulting_total);
 
         // println!("\r{}. row count {resulting_total} in {:?}", self.index + 1, start_time.elapsed());
 
