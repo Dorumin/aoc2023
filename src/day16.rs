@@ -5,7 +5,7 @@ pub struct Layout {
     pub rows: Vec<Vec<Tile>>
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Beam {
     direction: Direction,
     x: usize,
@@ -31,12 +31,12 @@ impl Beam {
 
     pub fn drive(&mut self, layout: &Layout) -> HashSet<(usize, usize)> {
         let mut points = HashSet::new();
-        let mut seen_points = HashSet::new();
+        let mut explored_beams = HashSet::new();
 
-        self.drive_with_points(layout,  &mut seen_points);
+        self.drive_with_points(layout,  &mut explored_beams);
 
-        for (_, x, y) in seen_points.into_iter() {
-            points.insert((x, y));
+        for beam in explored_beams.into_iter() {
+            points.insert((beam.x, beam.y));
         }
 
         points
@@ -45,10 +45,10 @@ impl Beam {
     pub fn drive_with_points(
         &mut self,
         layout: &Layout,
-        seen_points: &mut HashSet<(Direction, usize, usize)>
+        explored_beams: &mut HashSet<Beam>
     ) {
         loop {
-            let inserted = seen_points.insert((self.direction, self.x, self.y));
+            let inserted = explored_beams.insert(self.clone());
 
             // If the coordinate and direction existed in the hash fart, break
             if !inserted {
@@ -72,15 +72,15 @@ impl Beam {
                 // explore the two directions the bar is pointing at. Then break ourselves. Ouch
                 Tile::VerticalBar => {
                     if self.direction.is_horizontal() {
-                        self.with_direction(Direction::Up).drive_with_points(layout, seen_points);
-                        self.with_direction(Direction::Down).drive_with_points(layout, seen_points);
+                        self.with_direction(Direction::Up).drive_with_points(layout, explored_beams);
+                        self.with_direction(Direction::Down).drive_with_points(layout, explored_beams);
                         break;
                     }
                 },
                 Tile::HorizontalBar => {
                     if self.direction.is_vertical() {
-                        self.with_direction(Direction::Left).drive_with_points(layout, seen_points);
-                        self.with_direction(Direction::Right).drive_with_points(layout, seen_points);
+                        self.with_direction(Direction::Left).drive_with_points(layout, explored_beams);
+                        self.with_direction(Direction::Right).drive_with_points(layout, explored_beams);
                         break;
                     }
                 }
