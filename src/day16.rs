@@ -1,5 +1,7 @@
 use std::collections::HashSet;
 
+pub use crate::common::Direction;
+
 #[derive(Debug)]
 pub struct Layout {
     pub rows: Vec<Vec<Tile>>
@@ -106,42 +108,6 @@ impl Beam {
         }
 
         Some(())
-    }
-}
-
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Direction {
-    Up,
-    Down,
-    Left,
-    Right
-}
-
-impl Direction {
-    fn is_vertical(&self) -> bool {
-        matches!(self, Direction::Up | Direction::Down)
-    }
-
-    fn is_horizontal(&self) -> bool {
-        matches!(self, Direction::Right | Direction::Left)
-    }
-
-    fn reflected_right(&self) -> Self {
-        match self {
-            Direction::Up => Direction::Right,
-            Direction::Down => Direction::Left,
-            Direction::Left => Direction::Down,
-            Direction::Right => Direction::Up,
-        }
-    }
-
-    fn reflected_left(&self) -> Self {
-        match self {
-            Direction::Up => Direction::Left,
-            Direction::Down => Direction::Right,
-            Direction::Left => Direction::Up,
-            Direction::Right => Direction::Down,
-        }
     }
 }
 
