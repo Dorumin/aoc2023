@@ -71,7 +71,7 @@ impl Crucible {
 }
 
 impl Position {
-    fn next(&self, direction: Direction, max_straight_steps: u64, crucible: &Crucible) -> Option<Position> {
+    fn next(&self, direction: Direction, min_straight_steps: u64, max_straight_steps: u64, crucible: &Crucible) -> Option<Position> {
         // No takesies backsies
         if !direction == self.direction {
             return None;
@@ -90,6 +90,12 @@ impl Position {
             return None;
         }
 
+        if self.consecutive_straight_steps > 0 && self.consecutive_straight_steps < min_straight_steps && direction != self.direction {
+            return None;
+        }
+
+        // eprintln!("{} {} {consecutive_straight_steps} {:?} {:?}", self.x, self.y, direction, self.direction);
+
         match direction {
             Direction::Up => next_y = self.y.checked_sub(1)?,
             Direction::Down => next_y = self.y + 1,
@@ -106,29 +112,35 @@ impl Position {
         Some(next)
     }
 
-    fn adjacents(&self, max_straight_steps: u64, crucible: &Crucible) -> Vec<Position> {
+    fn adjacents(&self, min_straight_steps: u64, max_straight_steps: u64, crucible: &Crucible) -> Vec<Position> {
         let mut adjacents = Vec::with_capacity(4);
 
-        self.next(Direction::Up, max_straight_steps, crucible).into_iter().for_each(|p| adjacents.push(p));
-        self.next(Direction::Down, max_straight_steps, crucible).into_iter().for_each(|p| adjacents.push(p));
-        self.next(Direction::Left, max_straight_steps, crucible).into_iter().for_each(|p| adjacents.push(p));
-        self.next(Direction::Right, max_straight_steps, crucible).into_iter().for_each(|p| adjacents.push(p));
+        self.next(Direction::Up, min_straight_steps, max_straight_steps, crucible).into_iter().for_each(|p| adjacents.push(p));
+        self.next(Direction::Down, min_straight_steps, max_straight_steps, crucible).into_iter().for_each(|p| adjacents.push(p));
+        self.next(Direction::Left, min_straight_steps, max_straight_steps, crucible).into_iter().for_each(|p| adjacents.push(p));
+        self.next(Direction::Right, min_straight_steps, max_straight_steps, crucible).into_iter().for_each(|p| adjacents.push(p));
 
-        // if adjacents.iter().any(|p| p.x == 12 && p.y == 12) {
-        //     eprintln!("{:<2} {:<2} {:<2} {:<2}", self.x, self.y, adjacents.len(), self.consecutive_straight_steps);
-        // }
+        // eprintln!("adj for ({}, {}): {:?}", self.x, self.y, &adjacents);
 
-        if self.x == 12 {
-            eprintln!("{:<2} {:<2} {:<2} {:<2} {}", self.x, self.y, adjacents.len(), self.consecutive_straight_steps, adjacents.iter().any(|p| p.x == 12 && p.y == 12));
-        }
+        // Make sure adjacents does not include the end point if its consecutive steps is < than min_straight_steps
+        adjacents.retain(|p| {
+            let is_end = p.x == crucible.width() - 1 && p.y == crucible.height() - 1;
+            if !is_end {
+                return true;
+            }
+
+            // dbg!(p);
+
+            p.consecutive_straight_steps >= min_straight_steps
+        });
 
         adjacents
     }
 
-    pub fn pathfind_to(&self, end_point: &Position, crucible: &Crucible, max_straight_steps: u64) -> Vec<Position> {
+    pub fn pathfind_to(&self, end_point: &Position, crucible: &Crucible, min_straight_steps: u64, max_straight_steps: u64) -> Vec<Position> {
         let results = astar::astar(
             self,
-            |p| p.adjacents(max_straight_steps, crucible).into_iter().map(|p| {
+            |p| p.adjacents(min_straight_steps, max_straight_steps, crucible).into_iter().map(|p| {
                 let heat = p.heat;
                 (p, heat)
             }),
